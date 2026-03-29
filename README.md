@@ -1,94 +1,124 @@
-# Nexus ML 🚀
+<div align="center">
+  <h1>🚀 Nexus ML</h1>
+  <p><strong>A Pure Rust Machine Learning Framework bridging the Research-to-Production gap.</strong></p>
+</div>
 
-A Pure Rust Machine Learning Framework built to eliminate the **Research-to-Production gap**.
+---
 
-## The Vision
-In the current ecosystem, data scientists design and train models in Python (PyTorch/TensorFlow), but deploying these models at scale in production often requires rewriting inference code in C++, exporting to ONNX, or dealing with the operational nightmare of scaling Python environments.
+## 📖 What is it?
 
-**Nexus ML** changes this by providing a unified, high-performance library written entirely in Rust. It pairs the expressiveness and ergonomics of PyTorch's model definition (using Rust's powerful procedural macros) with the raw speed and zero-cost abstraction deployment of a compiled binary.
+**Nexus ML** is a fully-featured, from-scratch Machine Learning framework written entirely in Rust. 
 
-## Features
+The current ML ecosystem suffers from a massive **"Research-to-Production Gap."** Data scientists design and train models in Python (PyTorch/TensorFlow) because of its excellent ergonomics. However, deploying these models at scale in production often requires rewriting inference code in C++, exporting to fragile ONNX graphs, or dealing with the operational nightmare of scaling Python environments.
 
-### ✨ Macro Magic for Model Definition
-Defining neural networks feels like PyTorch, without sacrificing Rust's strict typing. The `#[derive(Module)]` macro automatically implements parameter registration and autograd tracking for all your layers.
+**Nexus ML changes this.** By leveraging Rust's performance, memory safety, and powerful procedural macros, it provides the expressiveness and ease-of-use of PyTorch alongside the raw speed and zero-cost abstraction of a compiled binary. 
+
+*Write your models like Python. Run them like C++.*
+
+---
+
+## 🎯 For Whom?
+
+- **ML Engineers & MLOps:** Professionals tired of the friction between training environments (Python) and deployment environments (C++/CUDA).
+- **Rust Developers:** Systems engineers who want to build and integrate AI directly into their Rust applications without relying on FFI bindings or Python wrappers.
+- **Startups & Edge Computing:** Teams that need ultra-fast, memory-safe inference on lean servers or edge devices without the overhead of the Python runtime.
+
+---
+
+## 🛠️ Core Features
+
+- **Macro Magic (`#[derive(Module)]`):** Define neural networks just like PyTorch. The macro automatically handles parameter registration and gradient tracking.
+- **Dynamic Autograd Engine:** A fully dynamic, eager-execution, reverse-mode automatic differentiation engine.
+- **Native Serialization:** Powered by HuggingFace's `safetensors`, models save and load with zero-copy overhead and maximum security (no arbitrary code execution like Python's pickle).
+- **Extensible Optimizers & Loss:** Built-in `SGD` optimizer and `MSE` loss, easily expandable to custom implementations.
+
+---
+
+## 🚀 How to Use It
+
+### 1. Define a Model
+Use the `#[derive(Module)]` macro to automatically register your network's trainable parameters (weights and biases).
 
 ```rust
 use nexus_ml::{Tensor, Module};
 use nexus_ml::nn::Linear;
 
 #[derive(Module)]
-struct MyModel {
-    fc1: Linear,
-    fc2: Linear,
+pub struct InferenceModel {
+    pub fc1: Linear,
+    pub fc2: Linear,
 }
 
-impl MyModel {
-    fn new() -> Self {
-        MyModel {
-            fc1: Linear::new(10, 5, true),
-            fc2: Linear::new(5, 1, true),
+impl InferenceModel {
+    pub fn new() -> Self {
+        InferenceModel {
+            fc1: Linear::new(10, 5, true), // in_features, out_features, bias
+            fc2: Linear::new(5, 2, true),
         }
     }
 
-    fn forward(&self, x: &Tensor) -> Tensor {
+    pub fn forward(&self, x: &Tensor) -> Tensor {
         let x1 = self.fc1.forward(x);
-        let x2 = x1.relu();
+        let x2 = x1.relu(); // Built-in activation functions
         self.fc2.forward(&x2)
     }
 }
 ```
 
-### 🧠 Dynamic Autograd Engine
-A fully dynamic, eager-execution, reverse-mode automatic differentiation engine. Call `.backward()` on your loss tensor, and gradients flow seamlessly back through `relu`, `matmul`, `add`, and more.
+### 2. Training Loop
+The training loop feels instantly familiar to anyone who has used PyTorch. Just calculate the loss, run `.backward()`, and step the optimizer!
 
 ```rust
-let pred = model.forward(&input);
-let loss = mse_loss(&pred, &target);
-loss.backward();
+use nexus_ml::optim::{Optimizer, SGD};
+use nexus_ml::loss::mse_loss;
+
+let model = InferenceModel::new();
+let mut optimizer = SGD::new(model.parameters(), 0.01); // Learning rate: 0.01
+
+for epoch in 0..100 {
+    optimizer.zero_grad();
+    
+    // Forward pass
+    let pred = model.forward(&input_tensor);
+    
+    // Calculate loss
+    let loss = mse_loss(&pred, &target_tensor);
+    
+    // Autograd Magic
+    loss.backward();
+    
+    // Update weights
+    optimizer.step();
+}
 ```
 
-### ⚡ Fast & Safe Serialization
-Powered by HuggingFace's `safetensors`, you can instantly save trained weights and load them straight into a production inference binary. No pickling. No arbitrary code execution. Zero-copy loading.
+### 3. Save & Load for Production (Safetensors)
+Instantly save your trained weights securely and load them into a production binary.
 
 ```rust
 use nexus_ml::io::{save_model, load_model, StatefulModule};
 
-// Save
-save_model(model.state_dict(), "model.safetensors").unwrap();
+// Save to disk
+save_model(model.state_dict(), "production_model.safetensors").unwrap();
 
-// Load in Production
-let state_dict = load_model("model.safetensors").unwrap();
-model.load_state_dict(state_dict);
+// --- On your production server ---
+let mut prod_model = InferenceModel::new();
+let weights = load_model("production_model.safetensors").unwrap();
+prod_model.load_state_dict(weights);
 ```
 
-### 🏃 Optimizers and Training
-Includes standard optimizers like SGD out of the box to loop through data and apply gradients easily.
+---
 
-```rust
-let mut optimizer = SGD::new(model.parameters(), 0.01);
-optimizer.zero_grad();
-// ... forward pass ...
-loss.backward();
-optimizer.step();
-```
+## 🌱 Open for Future Improvements
 
-## Running the Examples
-You can run the full test suite to see the framework train a model from scratch and correctly serialize it:
+Nexus ML is built with a solid foundation, but there is immense potential for future expansion. Contributions, PRs, and ideas are highly welcome!
 
-```bash
-cargo test
-```
+**Current Roadmap / Areas for Contribution:**
+1. **GPU Acceleration:** Implement compute backends using `WGPU` (for cross-platform & WebAssembly) or `cudarc` (for native NVIDIA acceleration).
+2. **Advanced Layers:** Add implementations for `Conv2d`, `BatchNorm`, `LayerNorm`, and `MultiHeadAttention` (Transformers).
+3. **Advanced Optimizers:** Implement `Adam` and `AdamW`.
+4. **ONNX Interoperability:** Build a utility to load existing PyTorch ONNX models directly into Nexus ML structures.
+5. **Data Loaders:** Build a multi-threaded, asynchronous `DataLoader` trait to prevent CPU bottlenecking during training.
 
-## Architecture
-1. **`tensor`**: Wrapper over `ndarray` linking data to our dynamic computational graph.
-2. **`autograd`**: Manages topological graph construction and backward passes.
-3. **`nn`**: Neural network layers (e.g., `Linear`) and the `Module` trait.
-4. **`optim`**: Gradient descent algorithms to update weights.
-5. **`io`**: Safe, memory-mapped parameter saving and loading.
-6. **`macros`**: Procedural macros (`#[derive(Module)]`) for ergonomic DX.
-
-## Future Roadmap
-- CUDA / GPU backend integration via WGPU or cudarc.
-- Advanced layers (Conv2d, Transformers/Attention, LayerNorm).
-- More optimizers (AdamW).
-- Cross-platform WebAssembly deployment target.
+---
+*Built with ❤️ in Rust.*
