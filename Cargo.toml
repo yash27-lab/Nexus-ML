@@ -1,0 +1,19 @@
+[package]
+name = "nexus_ml"
+version = "0.1.0"
+edition = "2021"
+description = "A pure Rust ML framework bridging the research-to-production gap."
+
+[workspace]
+members = [
+    ".",
+    "macros"
+]
+
+[dependencies]
+ndarray = "0.15"
+rand = "0.8"
+ndarray-rand = "0.14"
+lazy_static = "1.4"
+nexus_ml_macros = { path = "macros" }
+safetensors = "0.7.0"
