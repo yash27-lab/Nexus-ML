@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🚀 Nexus ML</h1>
+  <h1>Nexus ML</h1>
   <p><strong>A Pure Rust Machine Learning Framework bridging the Research-to-Production gap.</strong></p>
 </div>
 
