@@ -1,7 +1,7 @@
+use ndarray::{Array, ArrayD, Axis};
+use std::cell::RefCell;
 use std::collections::HashSet;
 use std::rc::Rc;
-use std::cell::RefCell;
-use ndarray::{ArrayD, Array};
 
 use crate::tensor::Tensor;
 
@@ -39,11 +39,38 @@ impl Node {
     }
 }
 
+/// Reduces a (possibly broadcast) gradient back to `target_shape` by summing over
+/// the axes that were broadcast during the forward op.
+///
+/// When the forward op broadcasts an operand (e.g. adding a `[1, out]` bias to a
+/// `[batch, out]` activation), the upstream gradient has the *broadcast* shape.
+/// The gradient w.r.t. the original operand is the sum over the expanded axes —
+/// skipping this both produces wrong gradients and corrupts parameter shapes.
+pub(crate) fn reduce_grad_to_shape(grad: ArrayD<f32>, target_shape: &[usize]) -> ArrayD<f32> {
+    let mut g = grad;
+    // Sum out any extra leading dimensions the broadcast added.
+    while g.ndim() > target_shape.len() {
+        g = g.sum_axis(Axis(0));
+    }
+    // Sum (keeping the dimension) over axes that were size 1 in the target but
+    // were expanded by broadcasting.
+    for (axis, &dim) in target_shape.iter().enumerate() {
+        if dim == 1 && g.shape()[axis] != 1 {
+            g = g.sum_axis(Axis(axis)).insert_axis(Axis(axis));
+        }
+    }
+    g
+}
+
 pub(crate) fn backward(root: Tensor) {
     let mut topo = vec![];
     let mut visited = HashSet::new();
 
-    fn build_topo(tensor: &Tensor, topo: &mut Vec<Tensor>, visited: &mut HashSet<*const RefCell<Node>>) {
+    fn build_topo(
+        tensor: &Tensor,
+        topo: &mut Vec<Tensor>,
+        visited: &mut HashSet<*const RefCell<Node>>,
+    ) {
         let ptr = Rc::as_ptr(&tensor.node);
         if !visited.contains(&ptr) {
             visited.insert(ptr);

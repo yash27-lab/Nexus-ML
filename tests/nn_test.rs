@@ -1,6 +1,6 @@
-use nexus_ml::{Tensor, Module};
-use nexus_ml::nn::{Linear, Module as NnModule};
 use ndarray::Array;
+use nexus_ml::nn::{Linear, Module as NnModule};
+use nexus_ml::{Module, Tensor};
 
 #[derive(Module)]
 struct MyModel {
@@ -26,22 +26,24 @@ impl MyModel {
 #[test]
 fn test_nn_macro_and_forward() {
     let model = MyModel::new();
-    
+
     // Check parameters collection from macro
     let params = model.parameters();
     assert_eq!(params.len(), 4); // fc1.weight, fc1.bias, fc2.weight, fc2.bias
 
     // Run a forward pass
-    let input_data = Array::from_shape_vec((1, 2), vec![0.5, -0.5]).unwrap().into_dyn();
+    let input_data = Array::from_shape_vec((1, 2), vec![0.5, -0.5])
+        .unwrap()
+        .into_dyn();
     let input = Tensor::new(input_data, false);
-    
+
     let output = model.forward(&input);
     let out_shape = output.data().shape().to_vec();
     assert_eq!(out_shape, vec![1, 1]);
-    
+
     // Run backward pass
     output.backward();
-    
+
     // Check gradients exist
     for param in params {
         assert!(param.grad().is_some());

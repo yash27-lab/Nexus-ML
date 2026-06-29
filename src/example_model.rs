@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-use crate::Tensor;
 use crate::nn::Linear;
+use crate::Tensor;
+use std::collections::HashMap;
 
 #[derive(crate::Module)]
 pub struct InferenceModel {
@@ -20,6 +20,12 @@ impl InferenceModel {
         let x1 = self.fc1.forward(x);
         let x2 = x1.relu();
         self.fc2.forward(&x2)
+    }
+}
+
+impl Default for InferenceModel {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

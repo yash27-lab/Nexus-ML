@@ -1,8 +1,8 @@
-use nexus_ml::{Tensor, Module};
-use nexus_ml::nn::{Linear, Module as NnModule};
-use nexus_ml::optim::{Optimizer, SGD, AdamW};
-use nexus_ml::loss::mse_loss;
 use ndarray::Array;
+use nexus_ml::loss::mse_loss;
+use nexus_ml::nn::{Linear, Module as NnModule};
+use nexus_ml::optim::{AdamW, Optimizer, SGD};
+use nexus_ml::{Module, Tensor};
 
 #[derive(Module)]
 struct TinyModel {
@@ -27,13 +27,13 @@ fn test_training_loop_sgd() {
     let mut optimizer = SGD::new(model.parameters(), 0.01);
 
     // Simple dataset: y = 2x + 1
-    let x_data = vec![
+    let x_data = [
         Array::from_shape_vec((1, 1), vec![1.0]).unwrap().into_dyn(),
         Array::from_shape_vec((1, 1), vec![2.0]).unwrap().into_dyn(),
         Array::from_shape_vec((1, 1), vec![3.0]).unwrap().into_dyn(),
     ];
-    
-    let y_data = vec![
+
+    let y_data = [
         Array::from_shape_vec((1, 1), vec![3.0]).unwrap().into_dyn(),
         Array::from_shape_vec((1, 1), vec![5.0]).unwrap().into_dyn(),
         Array::from_shape_vec((1, 1), vec![7.0]).unwrap().into_dyn(),
@@ -44,22 +44,22 @@ fn test_training_loop_sgd() {
 
     for epoch in 0..100 {
         let mut epoch_loss = 0.0;
-        
+
         for (i, x) in x_data.iter().enumerate() {
             let x_tensor = Tensor::new(x.clone(), false);
             let y_tensor = Tensor::new(y_data[i].clone(), false);
 
             optimizer.zero_grad();
-            
+
             let pred = model.forward(&x_tensor);
             let loss = mse_loss(&pred, &y_tensor);
-            
+
             loss.backward();
             optimizer.step();
 
             epoch_loss += loss.data()[[0]];
         }
-        
+
         if epoch == 0 {
             initial_loss = epoch_loss;
         }
@@ -78,13 +78,13 @@ fn test_training_loop_adamw() {
     let mut optimizer = AdamW::new(model.parameters(), 0.1);
 
     // Simple dataset: y = 2x + 1
-    let x_data = vec![
+    let x_data = [
         Array::from_shape_vec((1, 1), vec![1.0]).unwrap().into_dyn(),
         Array::from_shape_vec((1, 1), vec![2.0]).unwrap().into_dyn(),
         Array::from_shape_vec((1, 1), vec![3.0]).unwrap().into_dyn(),
     ];
-    
-    let y_data = vec![
+
+    let y_data = [
         Array::from_shape_vec((1, 1), vec![3.0]).unwrap().into_dyn(),
         Array::from_shape_vec((1, 1), vec![5.0]).unwrap().into_dyn(),
         Array::from_shape_vec((1, 1), vec![7.0]).unwrap().into_dyn(),
@@ -95,22 +95,22 @@ fn test_training_loop_adamw() {
 
     for epoch in 0..100 {
         let mut epoch_loss = 0.0;
-        
+
         for (i, x) in x_data.iter().enumerate() {
             let x_tensor = Tensor::new(x.clone(), false);
             let y_tensor = Tensor::new(y_data[i].clone(), false);
 
             optimizer.zero_grad();
-            
+
             let pred = model.forward(&x_tensor);
             let loss = mse_loss(&pred, &y_tensor);
-            
+
             loss.backward();
             optimizer.step();
 
             epoch_loss += loss.data()[[0]];
         }
-        
+
         if epoch == 0 {
             initial_loss = epoch_loss;
         }
@@ -121,4 +121,3 @@ fn test_training_loop_adamw() {
 
     assert!(final_loss < initial_loss);
 }
-

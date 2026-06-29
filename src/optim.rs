@@ -56,7 +56,7 @@ impl AdamW {
             m.push(Array::zeros(shape.clone()).into_dyn());
             v.push(Array::zeros(shape).into_dyn());
         }
-        
+
         AdamW {
             parameters,
             lr,
@@ -74,33 +74,33 @@ impl AdamW {
 impl Optimizer for AdamW {
     fn step(&mut self) {
         self.t += 1;
-        
+
         for (i, param) in self.parameters.iter().enumerate() {
             let mut node = param.node.borrow_mut();
             if let Some(ref grad) = node.grad {
                 // Weight decay
                 let mut p_data = node.data.clone();
                 p_data = &p_data - &(&p_data * (self.lr * self.weight_decay));
-                
+
                 // Update biased first moment estimate
                 self.m[i] = &self.m[i] * self.beta1 + grad * (1.0 - self.beta1);
-                
+
                 // Update biased second raw moment estimate
                 let grad_squared = grad * grad;
                 self.v[i] = &self.v[i] * self.beta2 + &grad_squared * (1.0 - self.beta2);
-                
+
                 // Compute bias-corrected first moment estimate
                 let bias_correction1 = 1.0 - self.beta1.powi(self.t);
                 let m_hat = &self.m[i] / bias_correction1;
-                
+
                 // Compute bias-corrected second raw moment estimate
                 let bias_correction2 = 1.0 - self.beta2.powi(self.t);
                 let v_hat = &self.v[i] / bias_correction2;
-                
+
                 // Update parameters
                 let denom = v_hat.mapv(|x| x.sqrt() + self.eps);
                 let update = m_hat / denom;
-                
+
                 node.data = p_data - (update * self.lr);
             }
         }
