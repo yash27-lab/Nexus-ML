@@ -2,6 +2,15 @@ use ndarray::array;
 use nexus_ml::Tensor;
 
 #[test]
+fn relu_boundary() {
+    let x = Tensor::new(array![-2.0, 0.0, 3.0].into_dyn(), true);
+    let y = x.relu();
+    assert_eq!(y.data(), array![0.0, 0.0, 3.0].into_dyn());
+    y.backward();
+    assert_eq!(x.grad().unwrap(), array![0.0, 0.0, 1.0].into_dyn());
+}
+
+#[test]
 fn constant_operand() {
     let x = Tensor::new(array![2.0].into_dyn(), true);
     let c = Tensor::new(array![3.0].into_dyn(), false);
