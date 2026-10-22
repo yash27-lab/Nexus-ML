@@ -2,6 +2,13 @@ use ndarray::array;
 use nexus_ml::Tensor;
 
 #[test]
+fn shared_operand() {
+    let x = Tensor::new(array![2.0, -3.0].into_dyn(), true);
+    x.mul(&x).backward();
+    assert_eq!(x.grad().unwrap(), array![4.0, -6.0].into_dyn());
+}
+
+#[test]
 fn gradient_snapshot() {
     let x = Tensor::new(array![2.0].into_dyn(), true);
     x.mul(&x).backward();
