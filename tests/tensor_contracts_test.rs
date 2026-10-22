@@ -2,6 +2,15 @@ use ndarray::array;
 use nexus_ml::Tensor;
 
 #[test]
+fn clone_alias() {
+    let x = Tensor::new(array![2.0].into_dyn(), true);
+    let alias = x.clone();
+    x.add(&alias).backward();
+    assert_eq!(x.grad().unwrap()[[0]], 2.0);
+    assert_eq!(alias.grad().unwrap(), x.grad().unwrap());
+}
+
+#[test]
 fn relu_boundary() {
     let x = Tensor::new(array![-2.0, 0.0, 3.0].into_dyn(), true);
     let y = x.relu();
