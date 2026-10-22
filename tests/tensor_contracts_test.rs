@@ -2,6 +2,16 @@ use ndarray::array;
 use nexus_ml::Tensor;
 
 #[test]
+fn broadcast_add() {
+    let x = Tensor::new(array![1.0, 2.0, 3.0].into_dyn(), true);
+    let scalar = Tensor::new(ndarray::arr0(2.0).into_dyn(), true);
+    x.add(&scalar).backward();
+    let grad = scalar.grad().unwrap();
+    assert_eq!(grad.ndim(), 0);
+    assert_eq!(grad[[]], 3.0);
+}
+
+#[test]
 fn clone_alias() {
     let x = Tensor::new(array![2.0].into_dyn(), true);
     let alias = x.clone();
