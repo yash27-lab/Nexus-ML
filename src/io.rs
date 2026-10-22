@@ -62,9 +62,8 @@ pub fn load_model(path: &str) -> Result<HashMap<String, Tensor>, Box<dyn std::er
 
         // Convert little-endian bytes back to f32 (safetensors is LE by spec).
         let mut f32_data = Vec::with_capacity(data.len() / 4);
-        for chunk in data.chunks_exact(4) {
-            let bytes: [u8; 4] = chunk.try_into().unwrap();
-            f32_data.push(f32::from_le_bytes(bytes));
+        for chunk in data.as_chunks::<4>().0 {
+            f32_data.push(f32::from_le_bytes(*chunk));
         }
 
         // We assume 2D for simplicity in this PoC, though it could be dynamic
