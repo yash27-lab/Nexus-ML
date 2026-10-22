@@ -2,6 +2,15 @@ use ndarray::array;
 use nexus_ml::Tensor;
 
 #[test]
+fn constant_chain() {
+    let x = Tensor::new(array![-1.0, 2.0].into_dyn(), false);
+    let y = x.add(&x).relu();
+    assert_eq!(y.data(), array![0.0, 4.0].into_dyn());
+    assert!(x.grad().is_none());
+    assert!(y.grad().is_none());
+}
+
+#[test]
 fn broadcast_add() {
     let x = Tensor::new(array![1.0, 2.0, 3.0].into_dyn(), true);
     let scalar = Tensor::new(ndarray::arr0(2.0).into_dyn(), true);
