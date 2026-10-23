@@ -3,6 +3,15 @@ use nexus_ml::optim::{AdamW, Optimizer, SGD};
 use nexus_ml::Tensor;
 
 #[test]
+fn adam_zero_gradient() {
+    let x = parameter(2.0);
+    let zero = Tensor::new(array![0.0].into_dyn(), false);
+    x.mul(&zero).backward();
+    AdamW::new(vec![x.clone()], 0.1).step();
+    close(x.data()[[0]], 1.998);
+}
+
+#[test]
 fn adam_shape() {
     let x = Tensor::new(array![1.0, 2.0, 3.0].into_dyn(), true);
     x.sum().backward();
