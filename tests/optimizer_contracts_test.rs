@@ -3,6 +3,14 @@ use nexus_ml::optim::{AdamW, Optimizer, SGD};
 use nexus_ml::Tensor;
 
 #[test]
+fn sgd_retains_gradient() {
+    let x = parameter(2.0);
+    x.mul(&x).backward();
+    SGD::new(vec![x.clone()], 0.1).step();
+    assert_eq!(x.grad().unwrap()[[0]], 4.0);
+}
+
+#[test]
 fn sgd_negative() {
     let x = parameter(-2.0);
     x.mul(&x).backward();
