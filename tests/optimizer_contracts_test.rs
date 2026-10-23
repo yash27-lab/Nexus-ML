@@ -3,6 +3,13 @@ use nexus_ml::optim::{AdamW, Optimizer, SGD};
 use nexus_ml::Tensor;
 
 #[test]
+fn adam_empty() {
+    let mut o = AdamW::new(vec![], 0.1);
+    o.step();
+    o.zero_grad();
+}
+
+#[test]
 fn sgd_unregistered() {
     let x = parameter(2.0);
     let y = parameter(3.0);
