@@ -3,6 +3,15 @@ use nexus_ml::optim::{AdamW, Optimizer, SGD};
 use nexus_ml::Tensor;
 
 #[test]
+fn adam_shape() {
+    let x = Tensor::new(array![1.0, 2.0, 3.0].into_dyn(), true);
+    x.sum().backward();
+    AdamW::new(vec![x.clone()], 0.1).step();
+    assert_eq!(x.data().shape(), &[3]);
+    assert!(x.data().iter().all(|v| v.is_finite()));
+}
+
+#[test]
 fn adam_negative() {
     let x = parameter(-2.0);
     x.mul(&x).backward();
