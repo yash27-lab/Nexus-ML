@@ -3,6 +3,15 @@ use nexus_ml::optim::{AdamW, Optimizer, SGD};
 use nexus_ml::Tensor;
 
 #[test]
+fn sgd_unregistered() {
+    let x = parameter(2.0);
+    let y = parameter(3.0);
+    x.mul(&y).backward();
+    SGD::new(vec![x], 0.1).step();
+    assert_eq!(y.data()[[0]], 3.0);
+}
+
+#[test]
 fn sgd_shape() {
     let x = Tensor::new(array![[1.0, 2.0], [3.0, 4.0]].into_dyn(), true);
     x.sum().backward();
