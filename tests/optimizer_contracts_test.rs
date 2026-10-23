@@ -3,6 +3,14 @@ use nexus_ml::optim::{AdamW, Optimizer, SGD};
 use nexus_ml::Tensor;
 
 #[test]
+fn adam_first_step() {
+    let x = parameter(2.0);
+    x.mul(&x).backward();
+    AdamW::new(vec![x.clone()], 0.1).step();
+    close(x.data()[[0]], 1.898);
+}
+
+#[test]
 fn adam_zero_rate() {
     let x = parameter(2.0);
     x.mul(&x).backward();
