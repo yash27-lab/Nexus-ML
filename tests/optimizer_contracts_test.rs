@@ -3,6 +3,19 @@ use nexus_ml::optim::{AdamW, Optimizer, SGD};
 use nexus_ml::Tensor;
 
 #[test]
+fn adam_multi_step() {
+    let x = parameter(2.0);
+    let mut o = AdamW::new(vec![x.clone()], 0.01);
+    for _ in 0..20 {
+        o.zero_grad();
+        x.mul(&x).backward();
+        o.step();
+    }
+    let v = x.data()[[0]];
+    assert!(v.is_finite() && v < 2.0 && v > 0.0);
+}
+
+#[test]
 fn adam_zero_gradient() {
     let x = parameter(2.0);
     let zero = Tensor::new(array![0.0].into_dyn(), false);
