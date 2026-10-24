@@ -2,6 +2,15 @@ use ndarray::{array, ArrayD};
 use nexus_ml::Tensor;
 
 #[test]
+fn sub_self() {
+    let x = tensor(array![2.0, 3.0].into_dyn());
+    let y = x.sub(&x);
+    assert_eq!(y.data(), array![0.0, 0.0].into_dyn());
+    y.backward();
+    assert_eq!(x.grad().unwrap(), array![0.0, 0.0].into_dyn());
+}
+
+#[test]
 fn mean_scaled() {
     let x = tensor(array![1.0, 2.0].into_dyn());
     let scale = Tensor::new(array![4.0].into_dyn(), false);
