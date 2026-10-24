@@ -2,6 +2,15 @@ use ndarray::{array, ArrayD};
 use nexus_ml::Tensor;
 
 #[test]
+fn mean_singleton() {
+    let x = tensor(array![7.0].into_dyn());
+    let y = x.mean();
+    close(y.data()[[0]], 7.0);
+    y.backward();
+    close(x.grad().unwrap()[[0]], 1.0);
+}
+
+#[test]
 fn mean_grad() {
     let x = tensor(array![2.0, 4.0, 6.0, 8.0].into_dyn());
     x.mean().backward();
