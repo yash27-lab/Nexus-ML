@@ -2,6 +2,15 @@ use ndarray::{array, ArrayD};
 use nexus_ml::Tensor;
 
 #[test]
+fn sub_right() {
+    let a = tensor(array![3.0, 4.0].into_dyn());
+    let b = tensor(array![1.0, 2.0].into_dyn());
+    a.sub(&b).backward();
+    assert_eq!(b.grad().unwrap(), array![-1.0, -1.0].into_dyn());
+    assert_eq!(a.grad().unwrap(), array![1.0, 1.0].into_dyn());
+}
+
+#[test]
 fn sub_self() {
     let x = tensor(array![2.0, 3.0].into_dyn());
     let y = x.sub(&x);
