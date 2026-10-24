@@ -2,6 +2,13 @@ use ndarray::{array, ArrayD};
 use nexus_ml::Tensor;
 
 #[test]
+fn mean_grad() {
+    let x = tensor(array![2.0, 4.0, 6.0, 8.0].into_dyn());
+    x.mean().backward();
+    assert_eq!(x.grad().unwrap(), array![0.25, 0.25, 0.25, 0.25].into_dyn());
+}
+
+#[test]
 fn mean_value() {
     let x = tensor(array![2.0, 4.0, 6.0, 8.0].into_dyn());
     let y = x.mean();
