@@ -2,6 +2,15 @@ use ndarray::{array, ArrayD};
 use nexus_ml::Tensor;
 
 #[test]
+fn sigmoid_extremes() {
+    let x = tensor(array![-1000.0, 1000.0].into_dyn());
+    let y = x.sigmoid();
+    assert_eq!(y.data(), array![0.0, 1.0].into_dyn());
+    y.backward();
+    assert!(x.grad().unwrap().iter().all(|v| v.is_finite()));
+}
+
+#[test]
 fn sigmoid_grad() {
     let x = tensor(array![0.0].into_dyn());
     x.sigmoid().backward();
