@@ -2,6 +2,14 @@ use ndarray::{array, ArrayD};
 use nexus_ml::Tensor;
 
 #[test]
+fn sum_matrix() {
+    let x = tensor(array![[1.0, 2.0], [3.0, 4.0]].into_dyn());
+    x.sum().backward();
+    assert_eq!(x.grad().unwrap().shape(), &[2, 2]);
+    assert!(x.grad().unwrap().iter().all(|v| *v == 1.0));
+}
+
+#[test]
 fn sum_grad() {
     let x = tensor(array![1.0, 2.0, 3.0].into_dyn());
     x.sum().backward();
