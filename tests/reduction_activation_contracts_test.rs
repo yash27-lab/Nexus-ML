@@ -2,6 +2,13 @@ use ndarray::{array, ArrayD};
 use nexus_ml::Tensor;
 
 #[test]
+fn sum_grad() {
+    let x = tensor(array![1.0, 2.0, 3.0].into_dyn());
+    x.sum().backward();
+    assert_eq!(x.grad().unwrap(), array![1.0, 1.0, 1.0].into_dyn());
+}
+
+#[test]
 fn sum_value() {
     let x = tensor(array![1.0, -2.0, 4.0].into_dyn());
     let y = x.sum();
