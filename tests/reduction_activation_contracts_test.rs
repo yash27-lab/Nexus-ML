@@ -2,6 +2,14 @@ use ndarray::{array, ArrayD};
 use nexus_ml::Tensor;
 
 #[test]
+fn mean_scaled() {
+    let x = tensor(array![1.0, 2.0].into_dyn());
+    let scale = Tensor::new(array![4.0].into_dyn(), false);
+    x.mean().mul(&scale).backward();
+    assert_eq!(x.grad().unwrap(), array![2.0, 2.0].into_dyn());
+}
+
+#[test]
 fn mean_singleton() {
     let x = tensor(array![7.0].into_dyn());
     let y = x.mean();
