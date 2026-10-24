@@ -2,6 +2,13 @@ use ndarray::{array, ArrayD};
 use nexus_ml::Tensor;
 
 #[test]
+fn tanh_odd() {
+    let x = tensor(array![-0.75, 0.75].into_dyn());
+    let data = x.tanh().data();
+    close(data[[0]], -data[[1]]);
+}
+
+#[test]
 fn tanh_zero() {
     let x = tensor(array![0.0].into_dyn());
     let y = x.tanh();
