@@ -2,6 +2,14 @@ use ndarray::{array, ArrayD};
 use nexus_ml::Tensor;
 
 #[test]
+fn activation_chain() {
+    let x = tensor(array![0.0].into_dyn());
+    x.sigmoid().tanh().backward();
+    let t = 0.5_f32.tanh();
+    close(x.grad().unwrap()[[0]], (1.0 - t * t) * 0.25);
+}
+
+#[test]
 fn tanh_extremes() {
     let x = tensor(array![-1000.0, 1000.0].into_dyn());
     let y = x.tanh();
