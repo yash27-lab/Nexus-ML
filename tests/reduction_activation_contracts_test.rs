@@ -2,6 +2,13 @@ use ndarray::{array, ArrayD};
 use nexus_ml::Tensor;
 
 #[test]
+fn sigmoid_grad() {
+    let x = tensor(array![0.0].into_dyn());
+    x.sigmoid().backward();
+    close(x.grad().unwrap()[[0]], 0.25);
+}
+
+#[test]
 fn sigmoid_zero() {
     let x = tensor(array![0.0].into_dyn());
     close(x.sigmoid().data()[[0]], 0.5);
