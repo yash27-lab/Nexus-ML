@@ -2,6 +2,15 @@ use ndarray::{array, ArrayD};
 use nexus_ml::Tensor;
 
 #[test]
+fn tanh_extremes() {
+    let x = tensor(array![-1000.0, 1000.0].into_dyn());
+    let y = x.tanh();
+    assert_eq!(y.data(), array![-1.0, 1.0].into_dyn());
+    y.backward();
+    assert!(x.grad().unwrap().iter().all(|v| v.is_finite()));
+}
+
+#[test]
 fn tanh_odd() {
     let x = tensor(array![-0.75, 0.75].into_dyn());
     let data = x.tanh().data();
