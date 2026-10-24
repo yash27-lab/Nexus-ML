@@ -2,6 +2,14 @@ use ndarray::{array, ArrayD};
 use nexus_ml::Tensor;
 
 #[test]
+fn mean_value() {
+    let x = tensor(array![2.0, 4.0, 6.0, 8.0].into_dyn());
+    let y = x.mean();
+    assert_eq!(y.data().shape(), &[1]);
+    close(y.data()[[0]], 5.0);
+}
+
+#[test]
 fn sum_scaled() {
     let x = tensor(array![1.0, 2.0].into_dyn());
     let scale = Tensor::new(array![3.0].into_dyn(), false);
