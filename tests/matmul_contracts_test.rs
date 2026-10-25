@@ -2,6 +2,15 @@ use ndarray::array;
 use nexus_ml::Tensor;
 
 #[test]
+fn both_gradient_shapes() {
+    let a = Tensor::new(array![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]].into_dyn(), true);
+    let b = Tensor::new(array![[1.0], [2.0], [3.0]].into_dyn(), true);
+    a.matmul(&b).sum().backward();
+    assert_eq!(a.grad().unwrap().shape(), &[2, 3]);
+    assert_eq!(b.grad().unwrap().shape(), &[3, 1]);
+}
+
+#[test]
 fn right_gradient() {
     let a = Tensor::new(array![[1.0, 2.0], [3.0, 4.0]].into_dyn(), false);
     let b = Tensor::new(array![[2.0], [3.0]].into_dyn(), true);
