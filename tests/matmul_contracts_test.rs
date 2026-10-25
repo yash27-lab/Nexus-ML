@@ -2,6 +2,14 @@ use ndarray::array;
 use nexus_ml::Tensor;
 
 #[test]
+#[should_panic(expected = "matmul requires 2D tensors")]
+fn reject_vector() {
+    let a = Tensor::new(array![1.0, 2.0].into_dyn(), false);
+    let b = Tensor::new(array![[1.0], [2.0]].into_dyn(), false);
+    a.matmul(&b);
+}
+
+#[test]
 fn shared_operand() {
     let a = Tensor::new(array![[2.0]].into_dyn(), true);
     a.matmul(&a).backward();
