@@ -2,6 +2,17 @@ use ndarray::array;
 use nexus_ml::Tensor;
 
 #[test]
+fn constant_operands() {
+    let a = Tensor::new(array![[1.0, 2.0]].into_dyn(), false);
+    let b = Tensor::new(array![[3.0], [4.0]].into_dyn(), false);
+    let y = a.matmul(&b);
+    assert_eq!(y.data()[[0, 0]], 11.0);
+    assert!(y.grad().is_none());
+    assert!(a.grad().is_none());
+    assert!(b.grad().is_none());
+}
+
+#[test]
 fn both_gradient_shapes() {
     let a = Tensor::new(array![[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]].into_dyn(), true);
     let b = Tensor::new(array![[1.0], [2.0], [3.0]].into_dyn(), true);
