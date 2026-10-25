@@ -2,6 +2,13 @@ use ndarray::array;
 use nexus_ml::Tensor;
 
 #[test]
+fn shared_operand() {
+    let a = Tensor::new(array![[2.0]].into_dyn(), true);
+    a.matmul(&a).backward();
+    assert_eq!(a.grad().unwrap()[[0, 0]], 4.0);
+}
+
+#[test]
 fn constant_operands() {
     let a = Tensor::new(array![[1.0, 2.0]].into_dyn(), false);
     let b = Tensor::new(array![[3.0], [4.0]].into_dyn(), false);
