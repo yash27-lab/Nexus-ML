@@ -4,6 +4,19 @@ use nexus_ml::Tensor;
 use std::collections::HashMap;
 
 #[test]
+fn malformed_checkpoint() {
+    let f = Fixture::new();
+    for bytes in [
+        b"".as_slice(),
+        b"not a safetensors checkpoint".as_slice(),
+        &[255; 8],
+    ] {
+        std::fs::write(&f.0, bytes).unwrap();
+        assert!(load_model(f.path()).is_err());
+    }
+}
+
+#[test]
 fn strided_roundtrip() {
     let f = Fixture::new();
     let data = array![[1.0, 2.0], [3.0, 4.0]].reversed_axes().into_dyn();
