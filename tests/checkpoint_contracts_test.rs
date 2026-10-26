@@ -4,6 +4,17 @@ use nexus_ml::Tensor;
 use std::collections::HashMap;
 
 #[test]
+fn strided_roundtrip() {
+    let f = Fixture::new();
+    let data = array![[1.0, 2.0], [3.0, 4.0]].reversed_axes().into_dyn();
+    let mut state = HashMap::new();
+    state.insert("weight".into(), Tensor::new(data.clone(), true));
+    save_model(state, f.path()).unwrap();
+    let loaded = load_model(f.path()).unwrap();
+    assert_eq!(loaded["weight"].data(), data);
+}
+
+#[test]
 fn scalar_roundtrip() {
     let f = Fixture::new();
     let t = Tensor::new(ndarray::arr0(3.5).into_dyn(), true);
