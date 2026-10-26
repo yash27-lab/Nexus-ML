@@ -58,6 +58,16 @@ pub fn load_model(path: &str) -> Result<HashMap<String, Tensor>, Box<dyn std::er
     let mut state_dict = HashMap::new();
 
     for (name, view) in tensors.tensors() {
+        if view.dtype() != Dtype::F32 {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                format!(
+                    "tensor '{name}' has unsupported dtype {:?}; expected F32",
+                    view.dtype()
+                ),
+            )
+            .into());
+        }
         let data = view.data();
 
         // Convert little-endian bytes back to f32 (safetensors is LE by spec).
