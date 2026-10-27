@@ -22,12 +22,14 @@ pub fn mse_loss(predictions: &Tensor, targets: &Tensor) -> Tensor {
 
     if requires_grad {
         let pred_clone = predictions.clone();
+        let pred_shape = pred_data.shape().to_vec();
 
         result_node.backward_fn = Some(Box::new(move |grad: &ArrayD<f32>| {
             if pred_clone.node.borrow().requires_grad {
                 let upstream_grad = grad[[0]]; // scalar gradient from upstream
                                                // d(MSE)/d(pred) = 2 * (pred - target) / N
                 let grad_pred = (&diff * (2.0 / n_elements)) * upstream_grad;
+                let grad_pred = crate::autograd::reduce_grad_to_shape(grad_pred, &pred_shape);
                 pred_clone.node.borrow_mut().add_grad(grad_pred);
             }
         }));
